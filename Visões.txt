@@ -1,0 +1,145 @@
+-- Modelo Paciente- Consulta-Medico
+
+Create table Paciente
+( Codpaciente    number(4,0)    Primary  Key,
+  Nompaciente    varchar2(30)   not null,
+  Datanasc       date,
+  Sexo           char( 1 ) check (sexo in ( 'F',  'M' )),	
+  Endereco      varchar2(25) ) ;
+
+
+Create table medico
+(codmedico number(4,0) primary key,
+ nomeMedico  varchar2(40));
+
+Create table Consulta
+(   Codconsulta   number(3,0)     Primary Key ,
+    Dataconsulta  date,
+    Tipocons      char(01)   check  (tipocons in ('P','C')),
+    Codpaciente  number(4,0) Not Null   References Paciente,                   
+    Codmedico    number(4,0) Not Null   References Medico ,
+    Valconsulta  number(6,2) Not Null ) ;
+
+
+
+
+-- Incluindo novas colunas na tabela de paciente
+
+ALTER TABLE  Paciente ADD (cidade varchar2( 15 )  ) ;
+
+ALTER TABLE  Paciente  MODIFY (cidade varchar2( 20 )   NOT   Null ) ;
+
+ALTER TABLE  Paciente  ADD (desconto char( 01 )   check  (desconto in ('S','N' ) )) ;
+
+/*
+RestriÃ§Ãµes que podem ser implementadas na criaÃ§Ã£o da Tabela
+RestriÃ§Ã£o de Chave primÃ¡ria
+RestriÃ§Ã£o de Chave estrangeira
+RestriÃ§Ã£o de clÃ¡usula check
+RestriÃ§Ã£o Unique
+RestriÃ§Ã£o de valores nulos NULL e o NOt NULL */
+
+-- Inserindo dados nas tabelas
+
+-- Inserindo 5 pacientes
+
+insert into Paciente values  (1,'Maria AntÃ´nia da Silva', '20/03/1998','F','Rua das Flores,40','Sorocaba','S');
+insert into Paciente values  (3,'JosÃ© Roberto Pereira', '20/04/2002','M','Rua Margarida,60','Itu','N');
+insert into Paciente values  (4,'Ana Costa', '02/06/1998','F','Rua das CamÃ©lias,140','Sorocaba','S');
+insert into Paciente values  (5,'Solange Pinheiro', '15/10/1994','F','Avenida VerÃ£o, 234','Itapetininga','N');
+insert into Paciente values  (6,'Caio da Silva', '05/03/1998','M','Rua das Flores,40','Sorocaba','S');
+insert into paciente values  (2,'Jose Maria','20/03/01','M','Rua Inverno, 30','Itu','N');
+
+-- Verificando as inserÃ§Ãµes
+
+select * from paciente;
+
+
+/* quando for necessÃ¡rio inserir dados em uma ordem diferente da ordem dos campos na tabela.
+insert into Paciente (nompaciente, codpaciente,.....) values ('Maria AntÃ´nia da Silva', 2,...)*/
+
+
+-- inserir 5 mÃ©dicos
+insert into medico values (100,'Dr. Who');
+insert into medico values (101,'Dr. House');
+insert into medico values (102,'Dr. Smith');
+insert into medico values (103,'Dr. X');
+insert into medico values (104,'Dr. Estranho');
+
+-- inserir 5 consultas
+
+insert into consulta values (300,'01-03-2021','P',3,102,500.50);
+insert into consulta values (301,'05-02-2021','C',5,103,100.50);
+insert into consulta values (302,'01-03-2020','P',2,102,600.00);
+insert into consulta values (303,'25-04-2021','C',1,104,99.98);
+
+commit;
+
+-- verificando as inclusÃµes
+select * from paciente;
+select * from medico;
+select * from consulta;
+-------------------------------------------------------------
+--Visão 1
+create or replace view pacsor
+as select * from paciente 
+where cidade = 'Sorocaba'
+with check option;
+
+select * from pacsor;
+
+select * from paciente;
+
+insert into pacsor
+values (77,'Roberto souza',sysdate,'M','rua','Sorocaba','S');
+
+
+update pacsor
+ set nompaciente = 'Carlos Souza'
+where codpaciente = 77;
+
+--Visão 2
+create or replace view pacsor_res
+as select codpaciente,nompaciente,datanasc as data_nascimento, sexo
+from pacsor;
+
+
+insert into pacsor_res(codpaciente,nompaciente,data_nascimento,sexo)
+values (49,'Ana',sysdate,'F');
+--Este update vai dar erro, porque a coluna cidade n faz parte da visão pacsor_res
+update pacsor_res
+ set nompaciente = 'KKKKK'
+where codpaciente = 1;
+
+select * from paciente;
+
+--Visão 3 
+create or replace view consulta_pac
+as select p.codpaciente, p.nompaciente, c.codconsulta
+from paciente p, consulta c
+where c.codpaciente = p.codpaciente and sexo='F';--Essa é a equação de junção
+select * from consulta_pac
+--Visão 4
+create or replace view salario_liq
+as select codmedico, (valconsulta * 0.75) as valorliq, 'medico bom'  as avaliacao
+from consulta;
+
+select * from consulta;
+
+select * from salario_liq;
+select codmedico "codigo do medico", (valconsulta * 0.75) as valorLiquido
+from consulta;
+
+--Visão 5
+create or replace view totalmed
+as select c.codmedico, m.nomeMedico, count(*) as totalconsultas--Aqui eu seleciono todas as colunas que eu quero ver, esse c,m são as abreviações para acessar a tabela
+from consulta c
+join medico m
+on c.codmedico = m.codMedico
+group by c.codmedico, m.nomeMedico;
+
+select * from  totalmed;
+select * from consulta;
+select * from medico;
+
+--Visão para cada código do médico liste codmedico, nome do medico e o total de consultas
