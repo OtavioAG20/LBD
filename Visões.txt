@@ -143,3 +143,43 @@ select * from consulta;
 select * from medico;
 
 --Visão para cada código do médico liste codmedico, nome do medico e o total de consultas
+
+--Resposta do Exercícios da Lista 2 de Visões
+--Exercício 1) Crie uma visão que possua: Código do medico,código do paciente e a data da consulta acrescentada em 30 dias (retorno).
+create or replace view dataretorno as
+select m.codMedico, p.codPaciente, c.DataConsulta, c.DataConsulta + 30 AS retorno
+from consulta c
+join medico m on m.codMedico = c.codMedico
+join paciente p on p.codPaciente = c.codPaciente;
+
+select * from dataretorno;
+
+--Exercício 2) Crie uma visão que possua: nome do medico,código da consulta e  dataconsulta.
+create or replace view consult as
+select m.NomeMedico, c.CodConsulta, c.DataConsulta
+from consulta c
+join medico m on m.CodMedico = c.CodMedico;
+
+select * from consult;
+
+--Exercício 3) Crie uma visão que exiba o código do medico e o valor total de suas consultas
+create or replace view valconsultas as
+select m.codMedico, SUM(c.valConsulta) as ValorTotal
+from consulta c
+join medico m on m.codMedico = c.codMedico
+group by m.codMedico;
+
+select * from valconsultas;
+
+--Exercício 4) Crie uma visão que exiba o código do medico, o nome do medico  e o valor médio de suas consultas
+create or replace view valMedio as
+select m.codMedico,m.nomeMedico, AVG(c.valConsulta) as ValorMedio
+from consulta c
+join medico m on m.codMedico = c.codMedico
+group by m.codMedico, m.NomeMedico;
+
+select * from valMedio;
+
+--Exercício 5) Listar o nome de todas as visões que tem a string “SOR’ no nome.
+select view_name from user_views where view_name like 'SOR';
+
