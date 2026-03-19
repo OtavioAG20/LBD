@@ -260,6 +260,27 @@ from tb_pedido where codvendedor =5) and codcliente not in(select codcliente fro
 --Exerc√≠cio 04 de SubConsultas
 select nomevendedor
 from tb_vendedor
-where codvendedor in(select codvendedor from tb_pedido group by codvendedor HAVING COUNT(*)<= 2);
+where codvendedor in(select codvendedor from tb_pedido group by codvendedor HAVING COUNT(*)< 2);
 
 select * from tb_pedido;
+
+--ExercÌcio 05 de SubConsultas
+select nomevendedor
+from tb_vendedor
+where codvendedor not in(select codvendedor from tb_pedido where to_char(prazo_entrega,'mm/yyyy') = '05/2021');
+
+--ExercÌcio 06 de SubConsultas
+select v.codvendedor, v.nomevendedor, count(*)as pedidos
+from tb_pedido p
+join tb_vendedor v on p.codvendedor = v.codvendedor
+group by v.codvendedor, v.nomevendedor 
+having count(*) = (select max(count(*)) from tb_pedido group by codvendedor);
+
+
+--Exemplo de exists( que retorno se o valor È verdadeiro ou n„o dentro de uma subcosnulta) caso seja veradeiro a consulta externa executa a consulta interna.
+select codcliente 
+from  tb_cliente
+where exists(select codcliente from tb_pedido where tb_pedido.codcliente = tb_cliente.codcliente);
+
+select 'N„o exitem pedidos para o cliente 35' from dual
+where not exists(select codcliente from tb_pedido where codcliente =35); 
