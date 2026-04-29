@@ -67,8 +67,11 @@ begin
     delete from tb_produto where codProduto = pCodProduto;
     end if;
     Exception
+    when ex_produto_com_pedido then
+        raise_application_error(-20001,
+            'Erro, produto com pedidos associados: ' || pCodProduto);
     when no_data_found then
-    insert into tab_erro values(sysdate, 'Código do Produto: ' || pCodProduto || 'roduto não encontrado');
+    insert into tab_erro values(sysdate, 'Código do Produto: ' || pCodProduto || 'produto não encontrado');
 end; 
 
 --Exercício 04 da lista04_B de procedures
@@ -76,7 +79,8 @@ create procedure ls04_ex04(pUnidade char) as
 v_cont number;
 v_lista varchar2(100);
 begin
-    select Lista(codproduto, ' , ') from tb_produto where unid = pUnidade; 
+    select Lista(codproduto, ', ') into v_lista from tb_produto where unid = pUnidade; 
     update tb_produto set valor_unit = valor_unit * 1.10 where unid = pUnidade;
-    insert into tabLog values(sysdate, 'PRODUTOS com preço modificado' || gdgdg || 'Linhas que atualizaram: ' || v_cont);
+    v_cont := sql%rowcount;
+    insert into tabLog values(sysdate, 'PRODUTOS com preço modificado' || v_cont || 'Códigos dos produtos: ' || v_lista);
 end;
