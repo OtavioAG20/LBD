@@ -1,0 +1,60 @@
+--Aula pratica 30/04
+Create or replace Function CalcDobro (p1 in number) return number 
+  as
+    p2 number;
+ BEGIN
+    p2 := p1* 2;
+    Return p2;
+ END;
+
+select * from tb_produto;
+SELECT CODPRODUTO, CalcDobro(valor_unit) from tb_produto;
+
+Create or replace Function  
+          Fn_devolve_descricao(pcodprod  TB_produto.codproduto%type)
+return varchar2
+as
+Vdesc TB_produto.descricao%type;
+Begin
+    Select descricao into vdesc
+    From TB_produto
+    Where TB_produto.codproduto = pcodprod;
+    Return (vdesc);
+End Fn_devolve_descricao;
+
+Select numpedido, codproduto, Fn_devolve_descricao(codproduto)
+From Tb_item_pedido;
+
+
+variable resultado varchar2(20);
+
+execute :resultado := fn_devolve_descricao (11);
+print resultado;
+
+
+select numpedido, codproduto,  substr(Fn_devolve_descricao(codproduto),1,15) as Descricao, pco_unit from Tb_item_pedido;
+
+
+
+--Exercício 01 da aula prática dia 30/04/2026
+create or replace function FN_verHora(pData date) return varchar2 as 
+begin
+return to_char (v_data, 'DD/MM/YYYY:HH24:mi:ss');
+end FN_verHora;
+
+--Exercício 02 da aula prática 30/04/2026
+select * from paciente;
+create or replace function FN_verCodigo(pCodPaciente paciente .codpaciente%type) return varchar2 as
+v_data date;
+v_conta number;
+begin
+select datanasc into v_data from paciente where codpaciente = pCodPaciente;
+v_conta := (sysdate - v_data)/365.25;
+if v_conta > 65 then
+return 'Idoso';
+else
+return 'Não idoso';
+end if;
+end;
+select codpaciente, datanasc, FN_verCodigo(codPaciente)
+from paciente;
